@@ -5,6 +5,7 @@ import javax.swing.table.*;
 import com.project.order.model.Menu;
 import com.project.order.service.MenuService;
 import com.project.order.service.OrderService;
+import com.project.order.service.RecommendService;
 import com.project.order.ui.CustomDialog;
 
 import java.awt.*;
@@ -20,7 +21,7 @@ public class OrderSystemUIFrame extends JFrame {
     private List<Menu> menus;
     private Map<Menu, Integer> cart = new LinkedHashMap<>();
 
-    private JPanel mainPanel, orderPanel, cartPanel;
+    private JPanel mainPanel, orderPanel, cartPanel, recommendPanel;
     private JLabel totalLbl, totalCartLbl;
     private DefaultTableModel cartModel;
 
@@ -53,6 +54,7 @@ public class OrderSystemUIFrame extends JFrame {
         cartPanel = createCartPanel();
         cartPanel.setBounds(0, 640, 360, 640);
         content.add(cartPanel);
+
     }
 
     private JPanel createMainPanel() {
@@ -96,8 +98,10 @@ public class OrderSystemUIFrame extends JFrame {
     }
 
     private JPanel createOrderPanel() {
-        JPanel p = new JPanel(null);
+        JPanel p = new JPanel(new BorderLayout());
         p.setBackground(new Color(248, 248, 248));
+        p.add(createRecommendPanel(), BorderLayout.NORTH);
+
 
         JPanel list = new JPanel();
         list.setLayout(new BoxLayout(list, BoxLayout.Y_AXIS));
@@ -110,10 +114,11 @@ public class OrderSystemUIFrame extends JFrame {
         sp.setBounds(0, 0, 360, 400);
         sp.setBorder(null);
         p.add(sp);
+        
 
         JPanel bottom = new JPanel(null);
         bottom.setBackground(Color.WHITE);
-        bottom.setBounds(0, 400, 360, 240);
+        bottom.setPreferredSize(new Dimension(360, 240));
 
         cartModel = new DefaultTableModel(new Object[] { "메뉴명", "수량", "금액", "" }, 0);
         JTable ct = new JTable(cartModel);
@@ -140,7 +145,7 @@ public class OrderSystemUIFrame extends JFrame {
         });
         bottom.add(checkout);
 
-        p.add(bottom);
+        p.add(bottom, BorderLayout.SOUTH);
         return p;
     }
 
@@ -173,6 +178,65 @@ public class OrderSystemUIFrame extends JFrame {
         checkout.setBounds(100, 370, 160, 50);
         checkout.addActionListener(e -> showOrderSummary());
         p.add(checkout);
+
+        return p;
+    }
+
+     private void Recommend(){
+        try {
+
+                 // 메뉴 가져오기
+                 MenuService menuSvc = new MenuService();
+                 List<Menu> allMenus = menuSvc.getAll();
+                 // 추천받기
+                 RecommendService recommender = new RecommendService();
+                 List<Menu> rec = recommender.getRecommend(allMenus);
+                 
+                 // 메시지 구성
+                 if (rec.size() >= 2) {
+                    String message = "<html>오늘의 추천 메뉴는<br><b>" +
+                    rec.get(0).getName() + "</b> 와(과) <b>" +
+                    rec.get(1).getName() + "</b> 입니다.</html>";
+
+                    JDialog dialog = new JDialog(this, "추천 메뉴", true);
+                    dialog.setLayout(new BorderLayout());
+            dialog.add(new JLabel(message, SwingConstants.CENTER), BorderLayout.CENTER);
+            JButton okBtn = new JButton("확인");
+            okBtn.addActionListener(ev -> dialog.dispose());
+            dialog.add(okBtn, BorderLayout.SOUTH);
+            dialog.setSize(300, 150);
+            dialog.setLocationRelativeTo(this);
+            dialog.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(this, "추천 가능한 메뉴가 부족합니다.");
+        }
+    } catch (Exception ex) {
+        JOptionPane.showMessageDialog(this, "추천 실패: " + ex.getMessage());
+    }
+}
+  
+  private JPanel createRecommendPanel() {
+
+        JPanel p = new JPanel(new BorderLayout());
+        p.setBackground(Color.WHITE);
+
+        JLabel icon = new JLabel();
+        URL url = getClass().getResource("/com/project/order/image/Logo.png");
+        if (url != null) {
+            ImageIcon iconImg = new ImageIcon(url);
+            icon.setIcon(new ImageIcon(iconImg.getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH)));
+        } 
+
+        JButton btn = new JButton("오늘의 추천");
+        btn.setFocusPainted(false);
+        btn.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        btn.setBackground(new Color(102, 153, 255));
+        btn.setForeground(Color.WHITE);
+        btn.setPreferredSize(new Dimension(140, 40));
+        btn.addActionListener(e -> Recommend());
+
+        p.add(icon, BorderLayout.WEST);
+        p.add(btn, BorderLayout.EAST);
 
         return p;
     }

@@ -17,4 +17,5 @@ public class Order extends BaseObject {
         String[] f = r.split("\\|");
         return new Order(Integer.parseInt(f[2]), Integer.parseInt(f[3]), f[4]);
     }
+
 }
