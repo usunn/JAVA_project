@@ -21,8 +21,9 @@ public class OrderSystemUIFrame extends JFrame {
 
 
     private JPanel mainPanel, orderPanel;
-    private JLabel totalLbl, totalCartLbl;
+    private JLabel totalLbl;
     private DefaultTableModel cartModel;
+    private JTable cartTable;
 
     public OrderSystemUIFrame() throws Exception {
         super("Order System");
@@ -126,14 +127,15 @@ public class OrderSystemUIFrame extends JFrame {
         bottom.setPreferredSize(new Dimension(360, 240));
 
         cartModel = new DefaultTableModel(new Object[] { "메뉴명", "수량", "금액", "" }, 0);
-        JTable ct = new JTable(cartModel);
-        ct.setShowGrid(false);
+        cartTable = new JTable(cartModel);
+        cartTable.setShowGrid(false);
+        cartTable.setRowHeight(25);
 
-        ct.setRowHeight(25);
-        TableColumn col = ct.getColumnModel().getColumn(3);
+        TableColumn col = cartTable.getColumnModel().getColumn(3);
         col.setCellRenderer(new ButtonRenderer());
         col.setCellEditor(new ButtonEditor(new JCheckBox()));
-        JScrollPane cp = new JScrollPane(ct);
+
+        JScrollPane cp = new JScrollPane(cartTable);
         cp.setBounds(0, 0, 360, 100);
         bottom.add(cp);
 
@@ -163,6 +165,7 @@ public class OrderSystemUIFrame extends JFrame {
         bottom.add(checkout);
 
         p.add(bottom, BorderLayout.SOUTH);
+
         return p;
     }
 
@@ -356,6 +359,10 @@ public class OrderSystemUIFrame extends JFrame {
     }
 
     private void refreshCart() {
+        if (cartTable.isEditing()) {
+            cartTable.getCellEditor().stopCellEditing();
+        }
+
         cartModel.setRowCount(0);
         int total = 0;
         for (Map.Entry<Menu, Integer> e : cart.entrySet()) {
@@ -364,7 +371,6 @@ public class OrderSystemUIFrame extends JFrame {
             total += amt;
         }
         totalLbl.setText("합계: " + total + " 원");
-        totalCartLbl.setText("합계: " + total + " 원");
     }
 
     private void switchTo(JPanel panel) {
