@@ -1,21 +1,16 @@
 package com.project.order.ui;
 
-import javax.swing.*;
-import javax.swing.table.*;
 import com.project.order.model.Menu;
 import com.project.order.service.MenuService;
 import com.project.order.service.OrderService;
-<<<<<<< HEAD
 import com.project.order.service.RecommendService;
-import com.project.order.ui.CustomDialog;
-=======
->>>>>>> 2a41d5cecc26bbb29657060e2188213b2f53261a
-
 import java.awt.*;
 import java.net.URL;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
+import javax.swing.*;
+import javax.swing.table.*;
 
 public class OrderSystemUIFrame extends JFrame {
     private MenuService menuSvc;
@@ -53,16 +48,10 @@ public class OrderSystemUIFrame extends JFrame {
         orderPanel.setVisible(false);
         content.add(orderPanel);
 
-<<<<<<< HEAD
         cartPanel = createCartPanel();
         cartPanel.setBounds(0, 640, 360, 640);
         content.add(cartPanel);
 
-=======
-        // cartPanel = createCartPanel();
-        // cartPanel.setBounds(0, 640, 360, 640);
-        // content.add(cartPanel);
->>>>>>> 2a41d5cecc26bbb29657060e2188213b2f53261a
     }
 
     private JPanel createMainPanel() {
@@ -166,7 +155,6 @@ public class OrderSystemUIFrame extends JFrame {
         
         bottom.add(checkout);
 
-<<<<<<< HEAD
         p.add(bottom, BorderLayout.SOUTH);
         return p;
     }
@@ -200,43 +188,35 @@ public class OrderSystemUIFrame extends JFrame {
         checkout.setBounds(100, 370, 160, 50);
         checkout.addActionListener(e -> showOrderSummary());
         p.add(checkout);
-=======
-        p.add(bottom);
->>>>>>> 2a41d5cecc26bbb29657060e2188213b2f53261a
 
         return p;
     }
 
-     private void Recommend(){
-        try {
+     private void Recommend() {
+    try {
+      
+        MenuService menuSvc = new MenuService();
+        List<Menu> allMenus = menuSvc.getAll();
 
-                 // 메뉴 가져오기
-                 MenuService menuSvc = new MenuService();
-                 List<Menu> allMenus = menuSvc.getAll();
-                 // 추천받기
-                 RecommendService recommender = new RecommendService();
-                 List<Menu> rec = recommender.getRecommend(allMenus);
-                 
-                 // 메시지 구성
-                 if (rec.size() >= 2) {
-                    String message = "<html>오늘의 추천 메뉴는<br><b>" +
-                    rec.get(0).getName() + "</b> 와(과) <b>" +
-                    rec.get(1).getName() + "</b> 입니다.</html>";
+        RecommendService recommender = new RecommendService();
+        Menu rec = recommender.getRecommend(allMenus);
+     
+       
+        if (rec!=null) {
+            String menu1 = rec.getName();
 
-                    JDialog dialog = new JDialog(this, "추천 메뉴", true);
-                    dialog.setLayout(new BorderLayout());
-            dialog.add(new JLabel(message, SwingConstants.CENTER), BorderLayout.CENTER);
-            JButton okBtn = new JButton("확인");
-            okBtn.addActionListener(ev -> dialog.dispose());
-            dialog.add(okBtn, BorderLayout.SOUTH);
-            dialog.setSize(300, 150);
-            dialog.setLocationRelativeTo(this);
-            dialog.setVisible(true);
+            String message = "오늘의 추천 메뉴는 " + menu1 +" 입니다.";
+
+            JOptionPane.showMessageDialog(this, message, "추천 메뉴", JOptionPane.INFORMATION_MESSAGE);
+
         } else {
+       
             JOptionPane.showMessageDialog(this, "추천 가능한 메뉴가 부족합니다.");
         }
-    } catch (Exception ex) {
-        JOptionPane.showMessageDialog(this, "추천 실패: " + ex.getMessage());
+
+    } catch (Exception e) {
+       
+        JOptionPane.showMessageDialog(this, "추천 실패: " + e.getMessage());
     }
 }
   
@@ -253,8 +233,7 @@ public class OrderSystemUIFrame extends JFrame {
         } 
 
         JButton btn = new JButton("오늘의 추천");
-        btn.setFocusPainted(false);
-        btn.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        btn.setFont(new Font("recommend", Font.PLAIN, 14));
         btn.setBackground(new Color(102, 153, 255));
         btn.setForeground(Color.WHITE);
         btn.setPreferredSize(new Dimension(140, 40));
