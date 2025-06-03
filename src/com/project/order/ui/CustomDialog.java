@@ -1,9 +1,7 @@
 package com.project.order.ui;
 
-import javax.swing.*;
 import java.awt.*;
-import javax.swing.AbstractButton;
-import javax.swing.JComponent;
+import javax.swing.*;
 
 public class CustomDialog extends JDialog {
     public CustomDialog(JFrame owner, String titleText, String messageText) {
@@ -29,7 +27,7 @@ public class CustomDialog extends JDialog {
         ok.setForeground(Color.WHITE);
         ok.setFocusPainted(false);
         ok.setBorder(BorderFactory.createEmptyBorder(8,20,8,20));
-        ok.addActionListener(_ -> dispose());
+        ok.addActionListener(e -> dispose());
         ok.setUI(new javax.swing.plaf.basic.BasicButtonUI() {
             @Override protected void paintButtonPressed(Graphics g, AbstractButton b) {}
             @Override public void paint(Graphics g, JComponent c) {
