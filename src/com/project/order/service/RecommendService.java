@@ -6,9 +6,7 @@ import java.util.*;
 public class RecommendService
 {
 	
-	public Menu getRecommend (List<Menu> menuList) throws Exception
-	{
-		MenuService service = new MenuService();
+	public Menu getRecommend (List<Menu> menuList) throws Exception {
         List<Menu> rmenu = menuList;
 
 		Sort sorted = new Sort();

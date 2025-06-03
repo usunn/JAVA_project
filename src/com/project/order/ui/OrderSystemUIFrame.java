@@ -5,6 +5,8 @@ import com.project.order.service.MenuService;
 import com.project.order.service.OrderService;
 import com.project.order.service.RecommendService;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.URL;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,11 +16,11 @@ import javax.swing.table.*;
 
 public class OrderSystemUIFrame extends JFrame {
     private MenuService menuSvc;
-    private OrderService orderSvc;
     private List<Menu> menus;
     private Map<Menu, Integer> cart = new LinkedHashMap<>();
 
-    private JPanel mainPanel, orderPanel, cartPanel, recommendPanel;
+
+    private JPanel mainPanel, orderPanel;
     private JLabel totalLbl, totalCartLbl;
     private DefaultTableModel cartModel;
 
@@ -29,7 +31,6 @@ public class OrderSystemUIFrame extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         menuSvc = new MenuService();
-        orderSvc = new OrderService();
         menus = menuSvc.getAll();
 
         initUI();
@@ -47,11 +48,6 @@ public class OrderSystemUIFrame extends JFrame {
         orderPanel.setBounds(0, 0, 360, 640);
         orderPanel.setVisible(false);
         content.add(orderPanel);
-
-        cartPanel = createCartPanel();
-        cartPanel.setBounds(0, 640, 360, 640);
-        content.add(cartPanel);
-
     }
 
     private JPanel createMainPanel() {
@@ -78,18 +74,29 @@ public class OrderSystemUIFrame extends JFrame {
         p.add(t);
         p.add(Box.createVerticalGlue());
 
-        JButton orderBtn = createRoundedButton("Order");
+        RoundedButton orderBtn = new RoundedButton("Order");
         orderBtn.setBackground(Color.BLACK);
         orderBtn.setForeground(Color.WHITE);
         orderBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        orderBtn.addActionListener(e -> switchTo(orderPanel));
+        orderBtn.setMaximumSize(new Dimension(250, 50));  
+        orderBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                switchTo(orderPanel);
+            }
+        });
         p.add(orderBtn);
-        p.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        JButton manageBtn = createRoundedButton("Manage");
-        manageBtn.setEnabled(false);
+        p.add(Box.createRigidArea(new Dimension(0, 15)));
+
+        RoundedButton manageBtn = new RoundedButton("Manage");
+        manageBtn.setBackground(new Color(227, 227, 227));
+        manageBtn.setForeground(new Color(177, 177, 177));
         manageBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        manageBtn.setMaximumSize(new Dimension(250, 50));
         p.add(manageBtn);
+
+        p.add(Box.createVerticalGlue()); // 남은 여백
 
         return p;
     }
@@ -99,14 +106,6 @@ public class OrderSystemUIFrame extends JFrame {
         p.setBackground(new Color(248, 248, 248));
         p.add(createRecommendPanel(), BorderLayout.NORTH);
 
-
-        // 상단 Title 추가
-        JLabel titleLbl = new JLabel("Menu");
-        titleLbl.setFont(new Font("SansSerif", Font.BOLD, 18));
-        titleLbl.setForeground(new Color(60, 60, 60));
-        titleLbl.setBounds(20, 10, 100, 30);
-        p.add(titleLbl);
-
         JPanel list = new JPanel();
         list.setLayout(new BoxLayout(list, BoxLayout.Y_AXIS));
         list.setBackground(Color.WHITE);
@@ -115,6 +114,7 @@ public class OrderSystemUIFrame extends JFrame {
             list.add(Box.createRigidArea(new Dimension(0, 10)));
         }
         JScrollPane sp = new JScrollPane(list);
+        sp.getVerticalScrollBar().setUnitIncrement(16); // 스크롤 16px만큼 이동
         sp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); // 좌우 스크롤바 정책 X
         sp.setBounds(0, 50, 360, 350);
         sp.setBorder(null);
@@ -127,6 +127,8 @@ public class OrderSystemUIFrame extends JFrame {
 
         cartModel = new DefaultTableModel(new Object[] { "메뉴명", "수량", "금액", "" }, 0);
         JTable ct = new JTable(cartModel);
+        ct.setShowGrid(false);
+
         ct.setRowHeight(25);
         TableColumn col = ct.getColumnModel().getColumn(3);
         col.setCellRenderer(new ButtonRenderer());
@@ -140,17 +142,22 @@ public class OrderSystemUIFrame extends JFrame {
         totalLbl.setBounds(200, 110, 160, 30);
         bottom.add(totalLbl);
 
-        JButton checkout = createRoundedButton("결제하기");
+        RoundedButton checkout = new RoundedButton("결제하기");
         checkout.setBackground(new Color(236, 102, 85));
         checkout.setForeground(Color.WHITE);
         checkout.setBounds(100, 150, 160, 40);
-        checkout.addActionListener(e -> {
-            if (cart.isEmpty()) {
-                CustomDialog dlg = new CustomDialog(this, "경고!", "메뉴를 선택 후 결제해주세요"); // 장바구니에 메뉴 없으면 예외처리
-                dlg.setVisible(true);
-                return;
+        checkout.setArc(20,20);
+
+        checkout.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (cart.isEmpty()) {
+                    CustomDialog dlg = new CustomDialog(OrderSystemUIFrame.this, "경고!", "메뉴를 선택 후 결제해주세요");
+                    dlg.setVisible(true);
+                    return;
+                }
+                showOrderSummary();
             }
-            showOrderSummary();
         });
         
         bottom.add(checkout);
@@ -159,65 +166,32 @@ public class OrderSystemUIFrame extends JFrame {
         return p;
     }
 
-    private JPanel createCartPanel() {
-        JPanel p = new JPanel(null);
-        p.setBackground(Color.WHITE);
-
-        JLabel header = new JLabel("Cart");
-        header.setFont(new Font("SansSerif", Font.BOLD, 20));
-        header.setBounds(10, 10, 200, 30);
-        p.add(header);
-
-        JTable table = new JTable(cartModel);
-        table.setRowHeight(25);
-        TableColumn col = table.getColumnModel().getColumn(3);
-        col.setCellRenderer(new ButtonRenderer());
-        col.setCellEditor(new ButtonEditor(new JCheckBox()));
-        JScrollPane cp = new JScrollPane(table);
-        cp.setBounds(0, 50, 360, 260);
-        p.add(cp);
-
-        totalCartLbl = new JLabel("합계: 0 원");
-        totalCartLbl.setFont(new Font("SansSerif", Font.BOLD, 18));
-        totalCartLbl.setBounds(200, 320, 160, 30);
-        p.add(totalCartLbl);
-
-        JButton checkout = createRoundedButton("결제하기");
-        checkout.setBackground(new Color(236, 102, 85));
-        checkout.setForeground(Color.WHITE);
-        checkout.setBounds(100, 370, 160, 50);
-        checkout.addActionListener(e -> showOrderSummary());
-        p.add(checkout);
-
-        return p;
-    }
-
      private void Recommend() {
-    try {
-      
-        MenuService menuSvc = new MenuService();
-        List<Menu> allMenus = menuSvc.getAll();
+        try {
+        
+            MenuService menuSvc = new MenuService();
+            List<Menu> allMenus = menuSvc.getAll();
 
-        RecommendService recommender = new RecommendService();
-        Menu rec = recommender.getRecommend(allMenus);
-     
-       
-        if (rec!=null) {
-            String menu1 = rec.getName();
+            RecommendService recommender = new RecommendService();
+            Menu rec = recommender.getRecommend(allMenus);
+        
+        
+            if (rec!=null) {
+                String menu1 = rec.getName();
 
-            String message = "오늘의 추천 메뉴는 " + menu1 +" 입니다.";
+                String message = "오늘의 추천 메뉴는 " + menu1 +" 입니다.";
 
-            JOptionPane.showMessageDialog(this, message, "추천 메뉴", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, message, "추천 메뉴", JOptionPane.INFORMATION_MESSAGE);
 
-        } else {
-       
-            JOptionPane.showMessageDialog(this, "추천 가능한 메뉴가 부족합니다.");
+            } else {
+        
+                JOptionPane.showMessageDialog(this, "추천 가능한 메뉴가 부족합니다.");
+            }
+
+        } catch (Exception e) {
+        
+            JOptionPane.showMessageDialog(this, "추천 실패: " + e.getMessage());
         }
-
-    } catch (Exception e) {
-       
-        JOptionPane.showMessageDialog(this, "추천 실패: " + e.getMessage());
-    }
 }
   
   private JPanel createRecommendPanel() {
@@ -237,7 +211,12 @@ public class OrderSystemUIFrame extends JFrame {
         btn.setBackground(new Color(102, 153, 255));
         btn.setForeground(Color.WHITE);
         btn.setPreferredSize(new Dimension(140, 40));
-        btn.addActionListener(e -> Recommend());
+        btn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Recommend();
+            }
+        });
 
         p.add(icon, BorderLayout.WEST);
         p.add(btn, BorderLayout.EAST);
@@ -246,8 +225,9 @@ public class OrderSystemUIFrame extends JFrame {
     }
 
     private void showOrderSummary() {
-        StringBuilder sb = new StringBuilder();
+        Map<Menu, Integer> cartCopy = new LinkedHashMap<>(cart);
 
+        StringBuilder sb = new StringBuilder();
         int total = 0;
         for (Map.Entry<Menu, Integer> entry : cart.entrySet()) {
             String name = entry.getKey().getName();
@@ -261,19 +241,42 @@ public class OrderSystemUIFrame extends JFrame {
             .append(" | ")
             .append(amt).append("원")
             .append("<br>");
-
             total += amt;
         }
         sb.append("<br> 합계 : ").append(total).append("원");
-
-        // HTML 태그로 wrapping
-        String raw = sb.toString();
+        String raw  = sb.toString();
         String html = "<html>" + raw + "</html>";
+
+        //  재고 차감 & 주문 로그 기록
+        try {
+            OrderService orderSvc = new OrderService();
+            orderSvc.placeOrder(cart);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this,
+                "주문 처리 중 오류 발생:\n" + ex.getMessage(),
+                "오류", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         CustomDialog dlg = new CustomDialog(this, "주문 완료!", html);
         dlg.setVisible(true);
 
-        // 결제 성공 시장바구니 비우기
+        // cartCopy를 이용해 메모리상의 menus 리스트의 stock만큼 차감
+        for (Map.Entry<Menu, Integer> entry : cartCopy.entrySet()) {
+            Menu orderedMenu = entry.getKey();
+            int  orderedQty  = entry.getValue();
+
+            // menus 리스트에서 name으로 동일 메뉴 객체를 찾은 뒤, stock 업데이트
+            for (Menu m : menus) {
+                if (m.getName().equals(orderedMenu.getName())) {
+                    int newStock = m.getStock() - orderedQty;
+                    if (newStock < 0) newStock = 0;
+                    m.setStock(newStock);
+                    break;
+                }
+            }
+        }
+
         cart.clear();
         refreshCart();
     }
@@ -313,17 +316,29 @@ public class OrderSystemUIFrame extends JFrame {
 
         JButton add = new JButton();
         add.setBounds(260, 25, 60, 30);
+
         if (m.getStock() <= 0) {
             add.setText("품절");
-            add.addActionListener(e -> {
-                CustomDialog dlg = new CustomDialog(this, "현재 메뉴는 품절입니다!",
-                        "다른 메뉴 선택 부탁드립니다");
-                dlg.setVisible(true);
+            add.setEnabled(false);   
+            add.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    CustomDialog dlg = new CustomDialog(OrderSystemUIFrame.this, "현재 메뉴는 품절입니다!",
+                            "다른 메뉴를 선택해주세요.");
+                    dlg.setVisible(true);
+                }
             });
         } else {
             add.setText("추가");
-            add.addActionListener(e -> addToCart(m));
+            add.setEnabled(true);
+            add.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    addToCart(m);
+                }
+            });
         }
+
         p.add(add);
         return p;
     }
@@ -355,15 +370,6 @@ public class OrderSystemUIFrame extends JFrame {
     private void switchTo(JPanel panel) {
         mainPanel.setVisible(panel == mainPanel);
         orderPanel.setVisible(panel == orderPanel);
-        cartPanel.setVisible(panel == cartPanel);
-    }
-
-    private JButton createRoundedButton(String text) {
-        JButton btn = new JButton(text);
-        btn.setFocusPainted(false);
-        btn.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
-        btn.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        return btn;
     }
 
     class ButtonRenderer extends JButton implements TableCellRenderer {
@@ -384,18 +390,21 @@ public class OrderSystemUIFrame extends JFrame {
         public ButtonEditor(JCheckBox checkBox) {
             super(checkBox);
             button = new JButton("삭제");
-            button.addActionListener(e -> {
-                String name = (String) cartModel.getValueAt(row, 0);
-                Menu key = null;
-                for (Menu m : cart.keySet()) {
-                    if (m.getName().equals(name)) {
-                        key = m;
-                        break;
+            button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    String name = (String) cartModel.getValueAt(row, 0);
+                    Menu key = null;
+                    for (Menu m : cart.keySet()) {
+                        if (m.getName().equals(name)) {
+                            key = m;
+                            break;
+                        }
                     }
-                }
-                if (key != null) {
-                    cart.remove(key);
-                    refreshCart();
+                    if (key != null) {
+                        cart.remove(key);
+                        refreshCart();
+                    }
                 }
             });
         }

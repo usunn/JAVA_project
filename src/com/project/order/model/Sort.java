@@ -3,8 +3,6 @@ import java.util.*;
 
 
 public class Sort {
-	
-	private List<Menu> menuList;
 	private List<Menu> realmenu = new ArrayList<>();
 	int size;
 	public PriorityQueue<Menu> pQ = new PriorityQueue<>(Collections.reverseOrder()); //재고많은 순으로 우선순위 결정

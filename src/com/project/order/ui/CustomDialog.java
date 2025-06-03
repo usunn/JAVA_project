@@ -29,7 +29,7 @@ public class CustomDialog extends JDialog {
         ok.setForeground(Color.WHITE);
         ok.setFocusPainted(false);
         ok.setBorder(BorderFactory.createEmptyBorder(8,20,8,20));
-        ok.addActionListener(e -> dispose());
+        ok.addActionListener(_ -> dispose());
         ok.setUI(new javax.swing.plaf.basic.BasicButtonUI() {
             @Override protected void paintButtonPressed(Graphics g, AbstractButton b) {}
             @Override public void paint(Graphics g, JComponent c) {
