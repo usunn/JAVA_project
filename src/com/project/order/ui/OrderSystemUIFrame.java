@@ -5,10 +5,8 @@ import javax.swing.table.*;
 import com.project.order.model.Menu;
 import com.project.order.service.MenuService;
 import com.project.order.service.OrderService;
-import com.project.order.ui.CustomDialog;
 
 import java.awt.*;
-import java.awt.event.*;
 import java.net.URL;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -50,9 +48,9 @@ public class OrderSystemUIFrame extends JFrame {
         orderPanel.setVisible(false);
         content.add(orderPanel);
 
-        cartPanel = createCartPanel();
-        cartPanel.setBounds(0, 640, 360, 640);
-        content.add(cartPanel);
+        // cartPanel = createCartPanel();
+        // cartPanel.setBounds(0, 640, 360, 640);
+        // content.add(cartPanel);
     }
 
     private JPanel createMainPanel() {
@@ -99,6 +97,13 @@ public class OrderSystemUIFrame extends JFrame {
         JPanel p = new JPanel(null);
         p.setBackground(new Color(248, 248, 248));
 
+        // 상단 Title 추가
+        JLabel titleLbl = new JLabel("Menu");
+        titleLbl.setFont(new Font("SansSerif", Font.BOLD, 18));
+        titleLbl.setForeground(new Color(60, 60, 60));
+        titleLbl.setBounds(20, 10, 100, 30);
+        p.add(titleLbl);
+
         JPanel list = new JPanel();
         list.setLayout(new BoxLayout(list, BoxLayout.Y_AXIS));
         list.setBackground(Color.WHITE);
@@ -107,7 +112,8 @@ public class OrderSystemUIFrame extends JFrame {
             list.add(Box.createRigidArea(new Dimension(0, 10)));
         }
         JScrollPane sp = new JScrollPane(list);
-        sp.setBounds(0, 0, 360, 400);
+        sp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); // 좌우 스크롤바 정책 X
+        sp.setBounds(0, 50, 360, 350);
         sp.setBorder(null);
         p.add(sp);
 
@@ -135,62 +141,52 @@ public class OrderSystemUIFrame extends JFrame {
         checkout.setForeground(Color.WHITE);
         checkout.setBounds(100, 150, 160, 40);
         checkout.addActionListener(e -> {
-            slideCartUp();
+            if (cart.isEmpty()) {
+                CustomDialog dlg = new CustomDialog(this, "경고!", "메뉴를 선택 후 결제해주세요"); // 장바구니에 메뉴 없으면 예외처리
+                dlg.setVisible(true);
+                return;
+            }
             showOrderSummary();
         });
+        
         bottom.add(checkout);
 
         p.add(bottom);
-        return p;
-    }
-
-    private JPanel createCartPanel() {
-        JPanel p = new JPanel(null);
-        p.setBackground(Color.WHITE);
-
-        JLabel header = new JLabel("Cart");
-        header.setFont(new Font("SansSerif", Font.BOLD, 20));
-        header.setBounds(10, 10, 200, 30);
-        p.add(header);
-
-        JTable table = new JTable(cartModel);
-        table.setRowHeight(25);
-        TableColumn col = table.getColumnModel().getColumn(3);
-        col.setCellRenderer(new ButtonRenderer());
-        col.setCellEditor(new ButtonEditor(new JCheckBox()));
-        JScrollPane cp = new JScrollPane(table);
-        cp.setBounds(0, 50, 360, 260);
-        p.add(cp);
-
-        totalCartLbl = new JLabel("합계: 0 원");
-        totalCartLbl.setFont(new Font("SansSerif", Font.BOLD, 18));
-        totalCartLbl.setBounds(200, 320, 160, 30);
-        p.add(totalCartLbl);
-
-        JButton checkout = createRoundedButton("결제하기");
-        checkout.setBackground(new Color(236, 102, 85));
-        checkout.setForeground(Color.WHITE);
-        checkout.setBounds(100, 370, 160, 50);
-        checkout.addActionListener(e -> showOrderSummary());
-        p.add(checkout);
 
         return p;
     }
 
     private void showOrderSummary() {
-        StringBuilder sb = new StringBuilder("주문이 완료되었습니다!\n\n");
+        StringBuilder sb = new StringBuilder();
+
         int total = 0;
-        for (Map.Entry<Menu, Integer> e : cart.entrySet()) {
-            int price = e.getKey().getPrice();
-            int qty = e.getValue();
-            int amt = price * qty;
-            sb.append(e.getKey().getName()).append(" - ")
-              .append(qty).append("개, ")
-              .append(amt).append("원 \n");
+        for (Map.Entry<Menu, Integer> entry : cart.entrySet()) {
+            String name = entry.getKey().getName();
+            int qty     = entry.getValue();
+            int price   = entry.getKey().getPrice();
+            int amt     = price * qty;
+
+            sb.append(name)
+            .append(" | ")
+            .append(qty).append("개")
+            .append(" | ")
+            .append(amt).append("원")
+            .append("<br>");
+
             total += amt;
         }
-        sb.append("\n총 합계: ").append(total).append("원");
-        JOptionPane.showMessageDialog(this, sb.toString(), "주문 내역", JOptionPane.INFORMATION_MESSAGE);
+        sb.append("<br> 합계 : ").append(total).append("원");
+
+        // HTML 태그로 wrapping
+        String raw = sb.toString();
+        String html = "<html>" + raw + "</html>";
+
+        CustomDialog dlg = new CustomDialog(this, "주문 완료!", html);
+        dlg.setVisible(true);
+
+        // 결제 성공 시장바구니 비우기
+        cart.clear();
+        refreshCart();
     }
 
     private JPanel itemComp(Menu m) {
@@ -231,7 +227,8 @@ public class OrderSystemUIFrame extends JFrame {
         if (m.getStock() <= 0) {
             add.setText("품절");
             add.addActionListener(e -> {
-                CustomDialog dlg = new CustomDialog(this, "현재 메뉴는 품절입니다!", "다른 메뉴 선택 부탁드립니다");
+                CustomDialog dlg = new CustomDialog(this, "현재 메뉴는 품절입니다!",
+                        "다른 메뉴 선택 부탁드립니다");
                 dlg.setVisible(true);
             });
         } else {
@@ -246,7 +243,7 @@ public class OrderSystemUIFrame extends JFrame {
         int cur = cart.getOrDefault(m, 0);
         if (cur >= m.getStock()) {
             CustomDialog dlg = new CustomDialog(this, "재고 부족",
-                    m.getName() + "의 재고가 부족합니다.\n현재 재고: " + m.getStock() + "개");
+                    m.getName() + "의 남은 재고는" + m.getStock() + "개 입니다.");
             dlg.setVisible(true);
             return;
         }
@@ -270,21 +267,6 @@ public class OrderSystemUIFrame extends JFrame {
         mainPanel.setVisible(panel == mainPanel);
         orderPanel.setVisible(panel == orderPanel);
         cartPanel.setVisible(panel == cartPanel);
-    }
-
-    private void slideCartUp() {
-        cartPanel.setVisible(true);
-        Timer t = new Timer(5, null);
-        t.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Point loc = cartPanel.getLocation();
-                if (loc.y <= 0)
-                    ((Timer) e.getSource()).stop();
-                else
-                    cartPanel.setLocation(0, loc.y - 20);
-            }
-        });
-        t.start();
     }
 
     private JButton createRoundedButton(String text) {
