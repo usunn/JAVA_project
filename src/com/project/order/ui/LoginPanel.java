@@ -1,9 +1,8 @@
 package com.project.order.ui;
 
 import com.project.order.service.AdminService;
-
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
 
 public class LoginPanel extends JPanel {
     private JTextField idField;
@@ -39,7 +38,7 @@ public class LoginPanel extends JPanel {
 
         // “로그인” 버튼
         RoundedButton loginBtn = new RoundedButton("로그인");
-        loginBtn.setBounds(120, 210, 120, 30);
+        loginBtn.setBounds(120, 210, 160, 35);
         loginBtn.setBackground(new Color(102, 153, 255));
         loginBtn.setForeground(Color.WHITE);
         loginBtn.addActionListener(e -> {
@@ -67,8 +66,9 @@ public class LoginPanel extends JPanel {
         add(loginBtn);
 
         // “뒤로가기” 버튼
-        RoundedButton backBtn = new RoundedButton("뒤로");
-        backBtn.setBounds(10, 10, 60, 25);
+        RoundedButton backBtn = new RoundedButton("←뒤로");
+        backBtn.setPreferredSize(new Dimension(100, 50));
+        backBtn.setBounds(10, 10, 100, 35);
         backBtn.setBackground(new Color(200, 200, 200));
         backBtn.addActionListener(e -> {
             // 뒤로가기 시 실행할 콜백
