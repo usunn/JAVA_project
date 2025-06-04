@@ -290,40 +290,63 @@ public class ManagePanel extends JPanel {
         // ── 하단: 메뉴 추가 입력란 + 버튼 ─────────────────────────────────────────────
         JPanel addPanel = new JPanel();
         addPanel.setLayout(new BoxLayout(addPanel, BoxLayout.Y_AXIS));
-        addPanel.setPreferredSize(new Dimension(400, 120));
+        addPanel.setPreferredSize(new Dimension(400, 160));
         addPanel.setBackground(Color.WHITE);
 
-        JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        // 1행: 메뉴명
+        JPanel row1 = new JPanel(new FlowLayout(FlowLayout.CENTER));
         row1.setBackground(Color.WHITE);
         row1.add(new JLabel("메뉴명:"));
         JTextField nameField = new JTextField(20);
         row1.add(nameField);
         addPanel.add(row1);
 
-        JPanel row2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        // 2행: 가격, 재고
+        JPanel row2 = new JPanel(new FlowLayout(FlowLayout.CENTER));
         row2.setBackground(Color.WHITE);
         row2.add(new JLabel("가격:"));
-        JTextField priceField = new JTextField(10);
+        JTextField priceField = new JTextField(8);
         row2.add(priceField);
+        row2.add(new JLabel("재고:"));
+        JTextField stockField = new JTextField(8);
+        row2.add(stockField);
         addPanel.add(row2);
-        JPanel row3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        // 3행: 이미지 경로 + 찾기 버튼
+        JPanel row3 = new JPanel(new FlowLayout(FlowLayout.CENTER));
         row3.setBackground(Color.WHITE);
-        row3.add(new JLabel("재고:"));
-        JTextField stockField = new JTextField(10);
-        RoundedButton addBtn = new RoundedButton("추가");
-        addBtn.setPreferredSize(new Dimension(80, 30));
+        row3.add(new JLabel("이미지:"));
+        JTextField imgPathField = new JTextField(15);
+        row3.add(imgPathField);
+        JButton browseBtn = new JButton("찾기");
+        row3.add(browseBtn);
+        addPanel.add(row3);
+
+        // 4행: 추가 버튼
+        JPanel row4 = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        row4.setBackground(Color.WHITE);
+        RoundedButton addBtn = new RoundedButton("추가하기");
+        addBtn.setPreferredSize(new Dimension(160, 35));
         addBtn.setBackground(new Color(102, 153, 255));
         addBtn.setForeground(Color.WHITE);
-        row3.add(stockField);
-        row3.add(addBtn);
-        addPanel.add(row3);
+        row4.add(addBtn);
+        addPanel.add(row4);
+
+        browseBtn.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser();
+            int result = chooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                imgPathField.setText(chooser.getSelectedFile().getAbsolutePath());
+            }
+        });
 
         addBtn.addActionListener(e -> {
             String name  = nameField.getText().trim();
             String priceText = priceField.getText().trim();
             String stockText = stockField.getText().trim();
+            String imgPath = imgPathField.getText().trim();
 
-            if (name.isEmpty() || priceText.isEmpty() || stockText.isEmpty()) {
+            if (name.isEmpty() || priceText.isEmpty() || stockText.isEmpty() || imgPath.isEmpty()) {
                 JOptionPane.showMessageDialog(this,
                     "모든 입력란을 채워주세요.",
                     "입력 오류", JOptionPane.WARNING_MESSAGE);
@@ -342,12 +365,17 @@ public class ManagePanel extends JPanel {
             }
 
             try {
+                java.nio.file.Path src = java.nio.file.Paths.get(imgPath);
+                java.nio.file.Path dest = java.nio.file.Paths.get("src/com/project/order/image/" + name + ".png");
+                java.nio.file.Files.copy(src, dest, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
                 boolean success = invSvc.addMenu(name, price, stock);
                 if (success) {
                     model.addRow(new Object[]{ name, price, stock });
                     nameField.setText("");
                     priceField.setText("");
                     stockField.setText("");
+                    imgPathField.setText("");
                     JOptionPane.showMessageDialog(this,
                         "새 메뉴가 추가되었습니다.",
                         "추가 완료", JOptionPane.INFORMATION_MESSAGE);
@@ -364,7 +392,6 @@ public class ManagePanel extends JPanel {
         });
 
         p.add(addPanel, BorderLayout.SOUTH);
-
         return p;
     }
 
