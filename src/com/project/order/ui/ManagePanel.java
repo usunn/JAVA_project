@@ -4,15 +4,14 @@ import com.project.order.model.Menu;
 import com.project.order.service.InventoryService;
 import com.project.order.service.OrderLogService;
 import com.project.order.service.SalesService;
-
-import javax.swing.*;
-import javax.swing.table.TableColumn;     
-import javax.swing.table.DefaultTableModel;  
 import java.awt.*;
-import java.util.List;
-import java.util.Map;
 import java.text.NumberFormat;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 
 
 public class ManagePanel extends JPanel {
@@ -289,36 +288,35 @@ public class ManagePanel extends JPanel {
         p.add(scroll, BorderLayout.CENTER);
 
         // ── 하단: 메뉴 추가 입력란 + 버튼 ─────────────────────────────────────────────
-        JPanel addPanel = new JPanel(null);
-        addPanel.setPreferredSize(new Dimension(360, 100));
+        JPanel addPanel = new JPanel();
+        addPanel.setLayout(new BoxLayout(addPanel, BoxLayout.Y_AXIS));
+        addPanel.setPreferredSize(new Dimension(400, 120));
         addPanel.setBackground(Color.WHITE);
 
-        JLabel nameLbl = new JLabel("메뉴명:");
-        nameLbl.setBounds(10, 10, 60, 25);
-        addPanel.add(nameLbl);
-        JTextField nameField = new JTextField();
-        nameField.setBounds(70, 10, 120, 25);
-        addPanel.add(nameField);
+        JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        row1.setBackground(Color.WHITE);
+        row1.add(new JLabel("메뉴명:"));
+        JTextField nameField = new JTextField(20);
+        row1.add(nameField);
+        addPanel.add(row1);
 
-        JLabel priceLbl = new JLabel("가격:");
-        priceLbl.setBounds(10, 45, 60, 25);
-        addPanel.add(priceLbl);
-        JTextField priceField = new JTextField();
-        priceField.setBounds(70, 45, 80, 25);
-        addPanel.add(priceField);
-
-        JLabel stockLbl = new JLabel("재고:");
-        stockLbl.setBounds(160, 45, 40, 25);
-        addPanel.add(stockLbl);
-        JTextField stockField = new JTextField();
-        stockField.setBounds(200, 45, 80, 25);
-        addPanel.add(stockField);
-
+        JPanel row2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        row2.setBackground(Color.WHITE);
+        row2.add(new JLabel("가격:"));
+        JTextField priceField = new JTextField(10);
+        row2.add(priceField);
+        addPanel.add(row2);
+        JPanel row3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        row3.setBackground(Color.WHITE);
+        row3.add(new JLabel("재고:"));
+        JTextField stockField = new JTextField(10);
         RoundedButton addBtn = new RoundedButton("추가");
-        addBtn.setBounds(290, 27, 60, 30);
-        addBtn.setBackground(new Color(102, 204, 102));
+        addBtn.setPreferredSize(new Dimension(80, 30));
+        addBtn.setBackground(new Color(102, 153, 255));
         addBtn.setForeground(Color.WHITE);
-        addPanel.add(addBtn);
+        row3.add(stockField);
+        row3.add(addBtn);
+        addPanel.add(row3);
 
         addBtn.addActionListener(e -> {
             String name  = nameField.getText().trim();
@@ -424,29 +422,70 @@ public class ManagePanel extends JPanel {
         JPanel p = new JPanel(new BorderLayout());
         p.setBackground(Color.WHITE);
 
-        // (1) 주문 로그 읽어서 “텍스트 에어리어”에 출력
-        JTextArea area = new JTextArea();
-        area.setEditable(false);
-        area.setFont(new Font("Monospaced", Font.PLAIN, 12));
-
-        try {
-            List<String> logs = logSvc.getOrderLogs();
-            if (logs.isEmpty()) {
-                area.setText("주문 로그가 없습니다.");
-            } else {
-                StringBuilder sb = new StringBuilder();
-                for (String line : logs) {
-                    sb.append(line).append("\n");
-                }
-                area.setText(sb.toString());
+        // 테이블 모델 정의
+        DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"시간", "주문 목록", "총액"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
             }
+        };
+
+        // JTable 생성
+        JTable table = new JTable(tableModel);
+        table.setRowHeight(60);
+        table.getTableHeader().setReorderingAllowed(false);
+
+        // 셀 렌더러 - 줄바꿈 적용
+        table.getColumnModel().getColumn(1).setCellRenderer((tbl, value, isSelected, hasFocus, row, col) -> {
+            JTextArea ta = new JTextArea(value.toString());
+            ta.setLineWrap(true);
+            ta.setWrapStyleWord(true);
+            ta.setOpaque(true);
+            ta.setFont(tbl.getFont());
+            ta.setBackground(isSelected ? tbl.getSelectionBackground() : tbl.getBackground());
+            return ta;
+        });
+
+        JScrollPane tableScroll = new JScrollPane(table);
+
+        // 주문 로그 읽기
+        try {
+            List<String> logs = logSvc.getOrderLogs(); // 파일에서 읽는 경우엔 대체 가능
+
+            for (String line : logs) {
+                // 1|2025-06-03 20:14:38|김치알밥 <4> 제육덮밥 <3> 육회비빔밥 <2>|43500
+                String[] parts = line.split("\\|", 4);
+                if (parts.length == 4) {
+                    String time = parts[1].trim();
+                    String rawMenu = parts[2].trim();
+                    String price = parts[3].trim();
+
+                    // 메뉴 파싱 (정규식으로 메뉴+수량 추출)
+                    StringBuilder formattedMenu = new StringBuilder();
+                    java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("([^<]+)<(\\d+)>").matcher(rawMenu);
+
+                    while (matcher.find()) {
+                        String name = matcher.group(1).trim();
+                        String count = matcher.group(2).trim();
+                        formattedMenu.append(name).append(" ").append(count).append("개\n");
+                    }
+
+                    tableModel.addRow(new Object[]{
+                        time,
+                        formattedMenu.toString().trim(),
+                        price
+                    });
+                }
+            }
+
         } catch (Exception ex) {
-            area.setText("주문 로그를 불러오는 중 오류 발생:\n" + ex.getMessage());
+            JOptionPane.showMessageDialog(this,
+                "주문 로그를 불러오는 중 오류 발생:\n" + ex.getMessage(),
+                "오류", JOptionPane.ERROR_MESSAGE);
         }
 
-        JScrollPane scroll = new JScrollPane(area);
-        p.add(scroll, BorderLayout.CENTER);
-
+        p.add(tableScroll, BorderLayout.CENTER);
         return p;
     }
+
 }
