@@ -1,13 +1,14 @@
 // File: OrderPanel.java
 package com.project.order.ui;
 
+import javax.swing.*;
+import javax.swing.table.*;
+
 import com.project.order.model.Menu;
 import com.project.order.service.MenuService;
 import com.project.order.service.OrderService;
 import com.project.order.service.RecommendService;
 
-import javax.swing.*;
-import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,6 +16,7 @@ import java.net.URL;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 
 public class OrderPanel extends JPanel {
     private MenuService menuSvc;
@@ -36,7 +38,15 @@ public class OrderPanel extends JPanel {
         setBackground(new Color(248, 248, 248));
 
         // 상단: 추천 메뉴 버튼
-        add(createRecommendPanel(), BorderLayout.NORTH);
+        add(createRecommendPanel(() -> {
+            // 뒤로가기 버튼 클릭 시 메인 화면으로 돌아가기
+            Container parent = this.getParent();
+            if (parent instanceof JPanel && parent.getLayout() instanceof CardLayout) {
+                CardLayout cl = (CardLayout) parent.getLayout();
+                cl.show(parent, "MAIN"); 
+            }
+        }), BorderLayout.NORTH);
+
 
         // 중앙: 메뉴 리스트
         JPanel listPanel = new JPanel();
@@ -76,10 +86,9 @@ public class OrderPanel extends JPanel {
         bottom.add(totalLbl);
 
         RoundedButton checkout = new RoundedButton("결제하기");
-        checkout.setBackground(new Color(236, 102, 85));
-        checkout.setForeground(Color.WHITE);
-        checkout.setBounds(100, 150, 160, 40);
-        checkout.setArc(20, 20);
+        checkout.setPreferredSize(new Dimension(250, 40));
+        checkout.setBackground(Color.black);
+        checkout.setBounds(50, 150, 250, 40);
         checkout.addActionListener(e -> {
             if (cart.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "메뉴를 선택 후 결제해주세요", "경고!", JOptionPane.WARNING_MESSAGE);
@@ -92,24 +101,24 @@ public class OrderPanel extends JPanel {
         add(bottom, BorderLayout.SOUTH);
     }
 
-    private JPanel createRecommendPanel() {
+    private JPanel createRecommendPanel(Runnable onBack) {
         JPanel p = new JPanel(new BorderLayout());
         p.setBackground(Color.WHITE);
-        p.setPreferredSize(new Dimension(360, 50));
+        p.setPreferredSize(new Dimension(360, 40));
 
-        JLabel icon = new JLabel();
-        URL url = getClass().getResource("/com/project/order/image/Logo.png");
-        if (url != null) {
-            ImageIcon ico = new ImageIcon(url);
-            icon.setIcon(new ImageIcon(ico.getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH)));
-        }
-        p.add(icon, BorderLayout.WEST);
+        // ← 뒤로가기 버튼 (WEST)
+        RoundedButton backBtn = new RoundedButton("←뒤로");
+        backBtn.setPreferredSize(new Dimension(100, 40));
+        backBtn.setBounds(10, 10, 80, 30);
+        backBtn.setBackground(new Color(200, 200, 200));
+        backBtn.addActionListener(e -> onBack.run());
+        p.add(backBtn, BorderLayout.WEST);
 
-        JButton btn = new JButton("오늘의 추천");
-        btn.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        RoundedButton btn = new RoundedButton("오늘의 추천 메뉴");
+        btn.setPreferredSize(new Dimension(170, 40));
+        btn.setBounds(10, 10, 80, 30);
         btn.setBackground(new Color(102, 153, 255));
-        btn.setForeground(Color.WHITE);
-        btn.setPreferredSize(new Dimension(140, 40));
+    
         btn.addActionListener(e -> {
             try {
                 RecommendService recommender = new RecommendService();
@@ -130,6 +139,7 @@ public class OrderPanel extends JPanel {
         return p;
     }
 
+
     private JPanel itemComp(Menu m) {
         JPanel p = new JPanel(null);
         p.setBackground(Color.WHITE);
@@ -138,7 +148,8 @@ public class OrderPanel extends JPanel {
 
         // 이미지 또는 기본 배경
         JLabel img = new JLabel();
-        URL imgUrl = getClass().getResource("/image/" + m.getName() + ".png");
+        URL imgUrl = getClass().getResource("/com/project/order/image/" + m.getName() + ".png");
+
         if (imgUrl != null) {
             ImageIcon ico = new ImageIcon(imgUrl);
             img.setIcon(new ImageIcon(ico.getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH)));
