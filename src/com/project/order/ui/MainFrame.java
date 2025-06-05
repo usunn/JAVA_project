@@ -5,10 +5,9 @@ import com.project.order.service.AdminService;
 import com.project.order.service.InventoryService;
 import com.project.order.service.OrderLogService;
 import com.project.order.service.SalesService;
-
-import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
+import javax.swing.*;
 
 public class MainFrame extends JFrame {
     private CardLayout cardLayout;
@@ -76,11 +75,11 @@ public class MainFrame extends JFrame {
         URL url = getClass().getResource("/com/project/order/image/Logo.png");
         if (url != null) {
             ImageIcon ico = new ImageIcon(url);
-            icon.setIcon(new ImageIcon(ico.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH)));
+            icon.setIcon(new ImageIcon(ico.getImage().getScaledInstance(120,120, Image.SCALE_SMOOTH)));
         }
         icon.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(icon);
-        panel.add(Box.createRigidArea(new Dimension(0, 30)));
+        panel.add(Box.createRigidArea(new Dimension(0, 20)));
 
         JLabel welcome1 = new JLabel("Welcome to");
         welcome1.setFont(new Font("SansSerif", Font.BOLD, 24));
