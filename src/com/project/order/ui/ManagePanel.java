@@ -131,6 +131,7 @@ public class ManagePanel extends JPanel {
 
                 try {
                     boolean ok = invSvc.updateMenu(oldName, newName, newPrice, newStock);
+<<<<<<< HEAD
                     if (!ok) throw new Exception("해당 메뉴를 찾을 수 없습니다: " + oldName);
 
                     //이미지 이름도 같이 수정
@@ -139,6 +140,10 @@ public class ManagePanel extends JPanel {
 
                     if (java.nio.file.Files.exists(oldImg)) {
                         java.nio.file.Files.move(oldImg, newImg, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+=======
+                    if (!ok) {
+                        throw new Exception("해당 메뉴를 찾을 수 없습니다: " + oldName);
+>>>>>>> d2af1b0 (OrderPanel: 결제 후 품절 버튼 상태 변경 기능 추가)
                     }
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(ManagePanel.this,
@@ -293,7 +298,11 @@ public class ManagePanel extends JPanel {
         JScrollPane scroll = new JScrollPane(table);
         p.add(scroll, BorderLayout.CENTER);
 
+<<<<<<< HEAD
 // ── 하단: 메뉴 추가 입력란 + 버튼 ─────────────────────────────────────────────
+=======
+        // ── 하단: 메뉴 추가 입력란 + 버튼 ─────────────────────────────────────────────
+>>>>>>> d2af1b0 (OrderPanel: 결제 후 품절 버튼 상태 변경 기능 추가)
         JPanel addPanel = new JPanel();
         addPanel.setLayout(new BoxLayout(addPanel, BoxLayout.Y_AXIS));
         addPanel.setPreferredSize(new Dimension(400, 160));
@@ -372,6 +381,7 @@ public class ManagePanel extends JPanel {
 
             try {
                 java.nio.file.Path src = java.nio.file.Paths.get(imgPath);
+<<<<<<< HEAD
 
                 // ─── 파일 확장자 검사 추가 ─────────────────────────────
                 if (!imgPath.toLowerCase().endsWith(".png")) {
@@ -391,6 +401,8 @@ public class ManagePanel extends JPanel {
                     return;
                 }
 
+=======
+>>>>>>> d2af1b0 (OrderPanel: 결제 후 품절 버튼 상태 변경 기능 추가)
                 java.nio.file.Path dest = java.nio.file.Paths.get("src/com/project/order/image/" + name + ".png");
                 java.nio.file.Files.copy(src, dest, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 
@@ -419,6 +431,10 @@ public class ManagePanel extends JPanel {
         p.add(addPanel, BorderLayout.SOUTH);
         return p;
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> d2af1b0 (OrderPanel: 결제 후 품절 버튼 상태 변경 기능 추가)
     // ─────────────────── “매출 확인” 탭 UI ───────────────────
     private JPanel createSalesTab() {
         JPanel p = new JPanel(new BorderLayout());
