@@ -131,8 +131,14 @@ public class ManagePanel extends JPanel {
 
                 try {
                     boolean ok = invSvc.updateMenu(oldName, newName, newPrice, newStock);
-                    if (!ok) {
-                        throw new Exception("해당 메뉴를 찾을 수 없습니다: " + oldName);
+                    if (!ok) throw new Exception("해당 메뉴를 찾을 수 없습니다: " + oldName);
+
+                    //이미지 이름도 같이 수정
+                    java.nio.file.Path oldImg = java.nio.file.Paths.get("src/com/project/order/image/" + oldName + ".png");
+                    java.nio.file.Path newImg = java.nio.file.Paths.get("src/com/project/order/image/" + newName + ".png");
+
+                    if (java.nio.file.Files.exists(oldImg)) {
+                        java.nio.file.Files.move(oldImg, newImg, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
                     }
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(ManagePanel.this,
@@ -287,7 +293,7 @@ public class ManagePanel extends JPanel {
         JScrollPane scroll = new JScrollPane(table);
         p.add(scroll, BorderLayout.CENTER);
 
-        // ── 하단: 메뉴 추가 입력란 + 버튼 ─────────────────────────────────────────────
+// ── 하단: 메뉴 추가 입력란 + 버튼 ─────────────────────────────────────────────
         JPanel addPanel = new JPanel();
         addPanel.setLayout(new BoxLayout(addPanel, BoxLayout.Y_AXIS));
         addPanel.setPreferredSize(new Dimension(400, 160));
@@ -366,6 +372,25 @@ public class ManagePanel extends JPanel {
 
             try {
                 java.nio.file.Path src = java.nio.file.Paths.get(imgPath);
+
+                // ─── 파일 확장자 검사 추가 ─────────────────────────────
+                if (!imgPath.toLowerCase().endsWith(".png")) {
+                    JOptionPane.showMessageDialog(this,
+                        "이미지 파일은 .png 형식만 지원합니다.",
+                        "파일 형식 오류", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // ─── 파일 이름 검사: 메뉴명.png와 일치해야 함 ─────────────
+                String expectedFilename = name + ".png";
+                String actualFilename = src.getFileName().toString();
+                if (!actualFilename.equals(expectedFilename)) {
+                    JOptionPane.showMessageDialog(this,
+                        "이미지 파일 이름은 메뉴명과 동일해야 합니다: " + expectedFilename,
+                        "파일 이름 불일치", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 java.nio.file.Path dest = java.nio.file.Paths.get("src/com/project/order/image/" + name + ".png");
                 java.nio.file.Files.copy(src, dest, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 
@@ -394,7 +419,6 @@ public class ManagePanel extends JPanel {
         p.add(addPanel, BorderLayout.SOUTH);
         return p;
     }
-
     // ─────────────────── “매출 확인” 탭 UI ───────────────────
     private JPanel createSalesTab() {
         JPanel p = new JPanel(new BorderLayout());
