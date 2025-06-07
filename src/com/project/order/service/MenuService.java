@@ -44,11 +44,11 @@ public class MenuService {
             throw new IOException("menu.txt를 찾을 수 없습니다: " + path.toAbsolutePath());
         }
 
-        // 1) menu.txt 모든 줄 읽기
+        // (1) menu.txt 모든 줄 읽기
         List<String> lines = Files.readAllLines(path);
         List<String> output = new ArrayList<>();
 
-        // 2) 각 줄마다 “이름(name)”을 찾아서 재고 차감
+        // (2) 각 줄마다 “이름(name)”을 찾아서 재고 차감
         for (String line : lines) {
             String[] parts = line.split(DELIMITER);
             if (parts.length < 5) {

@@ -13,10 +13,8 @@ import java.util.*;
 public class InventoryService {
     private static final String MENU_FILE = "src/com/project/order/logs/menu.txt";
 
-    /**
-     * menu.txt를 읽어서 메뉴 객체(List<Menu>)만 뽑아서 돌려준다.
-     * 파일 포맷: ID|타임스탬프|메뉴명|가격|재고
-     */
+     // menu.txt를 읽어서 메뉴 객체(List<Menu>)만 뽑아서 돌려준다.
+     // 파일 포맷: ID|타임스탬프|메뉴명|가격|재고
     public List<Menu> getAllMenus() throws IOException {
         List<Menu> result = new ArrayList<>();
         Path path = Paths.get(MENU_FILE);
@@ -44,12 +42,8 @@ public class InventoryService {
         return result;
     }
 
-    /**
-     * menu.txt에서 “메뉴명”이 menuName인 줄의 재고(stock)만 newStock으로 바꾼 뒤 전체를 덮어쓴다.
-     * @param menuName 수정할 메뉴명
-     * @param newStock 새 재고값
-     * @return true: 수정 성공, false: 해당 메뉴를 못 찾음
-     */
+
+    // menu.txt에서 “메뉴명”이 menuName인 줄의 재고(stock)만 newStock으로 바꾼 뒤 전체를 덮어쓴다.
     public boolean updateStock(String menuName, int newStock) throws IOException {
         Path path = Paths.get(MENU_FILE);
         if (!Files.exists(path)) {
@@ -135,7 +129,7 @@ public class InventoryService {
     public boolean addMenu(String name, int price, int stock) throws IOException {
         Path path = Paths.get(MENU_FILE);
 
-        // 1) 파일이 존재하면, 기존 줄 전부 읽어서 가장 큰 ID 찾기
+        // (1) 파일이 존재하면, 기존 줄 전부 읽어서 가장 큰 ID 찾기
         int maxId = 0;
         if (Files.exists(path)) {
             List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
@@ -151,15 +145,15 @@ public class InventoryService {
 
         int newId = maxId + 1;
 
-        // 2) 현재 시각을 "yyyy-MM-dd HH:mm:ss" 형식으로 얻기
+        // (2) 현재 시각을 "yyyy-MM-dd HH:mm:ss" 형식으로 얻기
         String timestamp = LocalDateTime.now()
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
-        // 3) "ID|타임스탬프|메뉴명|가격|재고" 한 줄로 조합
+        // (3) "ID|타임스탬프|메뉴명|가격|재고" 한 줄로 조합
         String newLine = String.format("%d|%s|%s|%d|%d",
                 newId, timestamp, name, price, stock);
 
-        // 4) menu.txt에 append
+        // (4) menu.txt에 append
         try (BufferedWriter writer = Files.newBufferedWriter(path,
                 StandardCharsets.UTF_8,
                 StandardOpenOption.CREATE,
