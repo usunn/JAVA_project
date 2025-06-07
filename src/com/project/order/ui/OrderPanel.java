@@ -23,6 +23,10 @@ public class OrderPanel extends JPanel {
     private List<Menu> menus;
     private Map<Menu, Integer> cart = new LinkedHashMap<>();
 
+    
+    private Map<Menu, JButton> menuButtons = new LinkedHashMap<>();
+
+
     private DefaultTableModel cartModel;
     private JTable cartTable;
     private JLabel totalLbl;
@@ -188,6 +192,9 @@ public class OrderPanel extends JPanel {
             add.setEnabled(true);
             add.addActionListener(e -> addToCart(m));
         }
+
+        menuButtons.put(m, add);
+
         p.add(add);
 
         return p;
@@ -254,6 +261,23 @@ public class OrderPanel extends JPanel {
                 if (m.getName().equals(orderedMenu.getName())) {
                     int newStock = m.getStock() - orderedQty;
                     m.setStock(Math.max(newStock, 0));
+
+                    
+                if (m.getStock() == 0) {
+                    JButton btn = menuButtons.get(m);
+                    if (btn != null) {
+                        btn.setText("품절");
+                        btn.setEnabled(false);
+                        for (ActionListener al : btn.getActionListeners()) {
+                            btn.removeActionListener(al);
+                        }
+                        btn.addActionListener(e ->
+                            JOptionPane.showMessageDialog(this, "현재 메뉴는 품절입니다!\n다른 메뉴를 선택해주세요.", "품절", JOptionPane.INFORMATION_MESSAGE)
+                        );
+                    }
+                }
+                    
+
                     break;
                 }
             }
