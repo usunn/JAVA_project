@@ -1,14 +1,19 @@
 package com.project.order.ui;
 
 import com.project.order.model.Menu;
+import com.project.order.model.OrderLog;
 import com.project.order.service.InventoryService;
 import com.project.order.service.OrderLogService;
 import com.project.order.service.SalesService;
+
 import java.awt.*;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
@@ -425,7 +430,7 @@ public class ManagePanel extends JPanel {
         p.setBackground(Color.WHITE);
 
         // (1) 주문 로그 전체를 가져와서
-        List<String> logs;
+        List<OrderLog> logs;
         try {
             logs = logSvc.getOrderLogs();
         } catch (Exception ex) {
@@ -501,33 +506,31 @@ public class ManagePanel extends JPanel {
 
         // 주문 로그 읽기
         try {
-            List<String> logs = logSvc.getOrderLogs(); // 파일에서 읽는 경우엔 대체 가능
+            List<OrderLog> logs = logSvc.getOrderLogs(); // 파일에서 읽는 경우엔 대체 가능
 
-            for (String line : logs) {
+            for (OrderLog log : logs) {
                 // 1|2025-06-03 20:14:38|김치알밥 <4> 제육덮밥 <3> 육회비빔밥 <2>|43500
-                String[] parts = line.split("\\|", 4);
-                if (parts.length == 4) {
-                    String time = parts[1].trim();
-                    String rawMenu = parts[2].trim();
-                    String price = parts[3].trim();
+                String time = log.getTs().toRecord();
+                String rawItems = log.getItems();  
 
-                    // 메뉴 파싱 (정규식으로 메뉴+수량 추출)
-                    StringBuilder formattedMenu = new StringBuilder();
-                    java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("([^<]+)<(\\d+)>").matcher(rawMenu);
-
-                    while (matcher.find()) {
-                        String name = matcher.group(1).trim();
-                        String count = matcher.group(2).trim();
-                        formattedMenu.append(name).append(" ").append(count).append("개\n");
-                    }
-
-                    tableModel.addRow(new Object[]{
-                        time,
-                        formattedMenu.toString().trim(),
-                        price
-                    });
+                // 메뉴 파싱 (정규식으로 메뉴+수량 추출)
+                StringBuilder formattedMenu = new StringBuilder();
+                Matcher m = Pattern.compile("([^<]+)<(\\d+)>").matcher(rawItems);
+                while (m.find()) {
+                    formattedMenu
+                    .append(m.group(1).trim())
+                    .append(" ")
+                    .append(m.group(2).trim())
+                    .append("개\n");
                 }
+
+                tableModel.addRow(new Object[]{
+                    time,
+                    formattedMenu.toString().trim(),
+                    NumberFormat.getNumberInstance(Locale.KOREA).format(log.getTotal()) + "원"
+                });
             }
+
         // 자동 행 높이 조정
         for (int row = 0; row < table.getRowCount(); row++) {
             int maxHeight = table.getRowHeight();

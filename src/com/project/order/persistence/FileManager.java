@@ -4,7 +4,6 @@ import java.io.*;
 import java.util.*;
 import java.util.function.Function;
 
-/** 텍스트 기반 파일 입출력 유틸 */
 public class FileManager {
     public static <T> List<T> loadAll(String filename, Function<String,T> parser) throws IOException {
         List<T> list = new ArrayList<>();
@@ -18,11 +17,20 @@ public class FileManager {
         }
         return list;
     }
+    
     public static void saveAll(String filename, List<? extends Persistable> list) throws IOException {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
             for (Persistable p : list) {
                 bw.write(p.toRecord()); bw.newLine();
             }
+        }
+    }
+
+    
+    public static void append(String filename, Persistable p) throws IOException {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename, true))) {
+            bw.write(p.toRecord());
+            bw.newLine();
         }
     }
 }

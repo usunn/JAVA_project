@@ -1,6 +1,8 @@
 package com.project.order.service;
 
-import com.project.order.model.*;
+import com.project.order.model.Sort;
+import com.project.order.model.Menu;
+import com.project.order.model.Recommend;
 import java.util.*;
 
 public class RecommendService

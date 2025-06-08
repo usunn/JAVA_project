@@ -1,29 +1,72 @@
 package com.project.order.model;
 
 import java.util.Comparator;
+import com.project.order.util.DateTime;
 
-public class Menu extends BaseObject implements Comparable<Menu>{
+public class Menu extends BaseObject implements Comparable<Menu> {
     protected String name;
     protected int price;
     protected int stock;
 
     public Menu(String name, int price, int stock) {
-        super(); this.name=name; this.price=price; this.stock=stock;
+        super(); 
+        this.name = name; 
+        this.price = price; 
+        this.stock = stock;
     }
-    public String getName(){return name;} public int getPrice(){return price;} public int getStock(){return stock;}
-    public void setStock(int stock){this.stock=stock;}
-    @Override public String toRecord() {
-        return super.toRecord()+"|"+name+"|"+price+"|"+stock;
+
+    public Menu(int id, DateTime ts, String name, int price, int stock) {
+        super(id, ts);
+        this.name = name;
+        this.price = price;
+        this.stock = stock;
     }
-    public static Menu fromRecord(String r) {
-        String[] f = r.split("\\|");
-        // f[0]=id, f[1]=ts, f[2]=name, f[3]=price, f[4]=stock
-        return new Menu(f[2], Integer.parseInt(f[3]), Integer.parseInt(f[4]));
+
+    public String getName() {
+        return name;
+    }
+
+    public int getPrice() {
+        return price;
     }
     
-	class MenuComparator implements Comparator<Menu>
-	{
+    public int getStock() {
+        return stock;
+    }
 
+    public void setName (String name) {
+        this.name = name;
+    }
+
+    public void setPrice (int price) {
+        this.price = price;
+    }
+
+    public void setStock (int stock) {
+        this.stock = stock;
+    }
+
+    public int getId() {
+        return super.id;
+    }
+    
+    @Override
+    public String toRecord() {
+        return super.toRecord()+"|"+name+"|"+price+"|"+stock;
+    }
+
+    public static Menu fromRecord(String r) {
+        String[] f = r.split("\\|");
+        int id = Integer.parseInt(f[0].trim());
+        DateTime ts = DateTime.parse(f[1].trim());
+        String name = f[2];
+        int price = Integer.parseInt(f[3].trim());
+        int stock = Integer.parseInt(f[4].trim());
+
+        return new Menu(id, ts, name, price, stock);
+    }
+    
+	class MenuComparator implements Comparator<Menu> {
 		@Override
 		public int compare(Menu o1, Menu o2) {
 			if(o1.stock == o2.stock)
@@ -38,6 +81,6 @@ public class Menu extends BaseObject implements Comparable<Menu>{
 	@Override
     public int compareTo(Menu other) {
         return Integer.compare(this.stock, other.stock); 
-    }	
+    }
 	
 }
