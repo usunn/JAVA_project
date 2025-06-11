@@ -1,6 +1,6 @@
 package com.project.order.model;
 
-import com.project.order.persistence.Persistable;
+import com.project.order.storage.Persistable;
 import com.project.order.util.DateTime;
 
 public abstract class BaseObject implements Persistable {

@@ -1,8 +1,8 @@
 package com.project.order.service;
 
 import com.project.order.model.Menu;
-import com.project.order.persistence.FileManager;
-import com.project.order.persistence.Persistable;
+import com.project.order.storage.FileManager;
+import com.project.order.storage.Persistable;
 import com.project.order.util.DateTime;
 
 import java.io.IOException;
