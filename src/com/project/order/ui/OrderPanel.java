@@ -253,35 +253,6 @@ public class OrderPanel extends JPanel {
 
         JOptionPane.showMessageDialog(this, html, "주문 완료!", JOptionPane.INFORMATION_MESSAGE);
 
-        // 재고 차감
-        for (Map.Entry<Menu, Integer> entry : cartCopy.entrySet()) {
-            Menu orderedMenu = entry.getKey();
-            int orderedQty = entry.getValue();
-            for (Menu m : menus) {
-                if (m.getName().equals(orderedMenu.getName())) {
-                    int newStock = m.getStock() - orderedQty;
-                    m.setStock(Math.max(newStock, 0));
-
-                    
-                if (m.getStock() == 0) {
-                    JButton btn = menuButtons.get(m);
-                    if (btn != null) {
-                        btn.setText("품절");
-                        btn.setEnabled(false);
-                        for (ActionListener al : btn.getActionListeners()) {
-                            btn.removeActionListener(al);
-                        }
-                        btn.addActionListener(e ->
-                            JOptionPane.showMessageDialog(this, "현재 메뉴는 품절입니다!\n다른 메뉴를 선택해주세요.", "품절", JOptionPane.INFORMATION_MESSAGE)
-                        );
-                    }
-                }
-                    
-
-                    break;
-                }
-            }
-        }
         cart.clear();
         refreshCart();
     }

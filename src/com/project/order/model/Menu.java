@@ -1,6 +1,7 @@
 package com.project.order.model;
 
 import java.util.Comparator;
+import java.util.Objects;
 import com.project.order.util.DateTime;
 
 public class Menu extends BaseObject implements Comparable<Menu> {
@@ -82,5 +83,17 @@ public class Menu extends BaseObject implements Comparable<Menu> {
     public int compareTo(Menu other) {
         return Integer.compare(this.stock, other.stock); 
     }
-	
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Menu)) return false;
+        Menu other = (Menu) o;
+        return Objects.equals(this.name, other.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
 }
