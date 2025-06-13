@@ -248,6 +248,16 @@ public class OrderPanel extends JPanel {
             return;
         }
 
+        menus = menuSvc.getAll();
+        for (Menu m : menus) {
+            JButton btn = menuButtons.get(m);
+            if (btn == null) continue;
+            if (m.getStock() <= 0) {
+                btn.setText("품절");
+                btn.setEnabled(false);
+            }
+        }
+
         JOptionPane.showMessageDialog(this, html, "주문 완료!", JOptionPane.INFORMATION_MESSAGE);
 
         cart.clear();
