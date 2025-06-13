@@ -51,12 +51,12 @@ public class ManagePanel extends JPanel {
         add(tabs, BorderLayout.CENTER);
     }
 
-    // ─────────────────── “재고 관리” 탭 UI ───────────────────
+    // “재고 관리” 탭 UI
     private JPanel createInventoryTab() {
         JPanel p = new JPanel(new BorderLayout());
         p.setBackground(Color.WHITE);
 
-        // ─── 테이블(기존) ───────────────────────────────────────────────────────
+        //  테이블(기존)
         DefaultTableModel model = new DefaultTableModel(new Object[] {
                 "메뉴명", "가격", "재고"
         }, 0) {
@@ -83,7 +83,7 @@ public class ManagePanel extends JPanel {
                 "오류", JOptionPane.ERROR_MESSAGE);
         }
 
-        // ── 편집 전 데이터를 저장할 변수 ───────────────────────────────────────────
+        // 편집 전 데이터를 저장할 변수
         final String[] beforeName  = new String[1];
         final int[]    beforePrice = new int[1];
         final int[]    beforeStock = new int[1];
@@ -91,7 +91,7 @@ public class ManagePanel extends JPanel {
         editRow[0] = -1;
         beforeName[0] = null;
 
-        // ── 1) “메뉴명” 열(컬럼 0)에 대한 CellEditor 설정 ─────────────────────────────
+        //  1) “메뉴명” 열(컬럼 0)에 대한 CellEditor 설정
         TableColumn nameCol = table.getColumnModel().getColumn(0);
         nameCol.setCellEditor(new DefaultCellEditor(new JTextField()) {
             @Override
@@ -163,7 +163,7 @@ public class ManagePanel extends JPanel {
             }
         });
 
-        // ── 2) “가격” 열(컬럼 1)에 대한 CellEditor 설정 ───────────────────────────────
+        // 2) “가격” 열(컬럼 1)에 대한 CellEditor 설정 
         TableColumn priceCol = table.getColumnModel().getColumn(1);
         priceCol.setCellEditor(new DefaultCellEditor(new JTextField()) {
             @Override
@@ -229,7 +229,7 @@ public class ManagePanel extends JPanel {
             }
         });
 
-        // ── 3) “재고” 열(컬럼 2)에 대한 CellEditor 설정 ───────────────────────────────
+        //  3) “재고” 열(컬럼 2)에 대한 CellEditor 설정 
         TableColumn stockCol = table.getColumnModel().getColumn(2);
         stockCol.setCellEditor(new DefaultCellEditor(new JTextField()) {
             @Override
@@ -298,7 +298,7 @@ public class ManagePanel extends JPanel {
         JScrollPane scroll = new JScrollPane(table);
         p.add(scroll, BorderLayout.CENTER);
 
-// ── 하단: 메뉴 추가 입력란 + 버튼 ─────────────────────────────────────────────
+//  하단: 메뉴 추가 입력란 + 버튼
         JPanel addPanel = new JPanel();
         addPanel.setLayout(new BoxLayout(addPanel, BoxLayout.Y_AXIS));
         addPanel.setPreferredSize(new Dimension(400, 160));
@@ -378,7 +378,7 @@ public class ManagePanel extends JPanel {
             try {
                 java.nio.file.Path src = java.nio.file.Paths.get(imgPath);
 
-                // ─── 파일 확장자 검사 추가 ─────────────────────────────
+                // 파일 확장자 검사 추가 
                 if (!imgPath.toLowerCase().endsWith(".png")) {
                     JOptionPane.showMessageDialog(this,
                         "이미지 파일은 .png 형식만 지원합니다.",
@@ -386,7 +386,7 @@ public class ManagePanel extends JPanel {
                     return;
                 }
 
-                // ─── 파일 이름 검사: 메뉴명.png와 일치해야 함 ─────────────
+                // 파일 이름 검사: 메뉴명.png와 일치해야 함
                 String expectedFilename = name + ".png";
                 String actualFilename = src.getFileName().toString();
                 if (!actualFilename.equals(expectedFilename)) {
@@ -424,7 +424,7 @@ public class ManagePanel extends JPanel {
         p.add(addPanel, BorderLayout.SOUTH);
         return p;
     }
-    // ─────────────────── “매출 확인” 탭 UI ───────────────────
+    // “매출 확인” 탭 UI 
     private JPanel createSalesTab() {
         JPanel p = new JPanel(new BorderLayout());
         p.setBackground(Color.WHITE);
@@ -473,7 +473,7 @@ public class ManagePanel extends JPanel {
         return p;
     }
 
-    // ─────────────────── “주문 내역” 탭 UI ───────────────────
+    //  “주문 내역” 탭 UI
     private JPanel createOrderLogTab() {
         JPanel p = new JPanel(new BorderLayout());
         p.setBackground(Color.WHITE);

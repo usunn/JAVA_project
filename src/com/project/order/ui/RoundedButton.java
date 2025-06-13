@@ -17,7 +17,6 @@ public class RoundedButton extends JButton {
         setOpaque(false);
         setForeground(Color.WHITE);    // 텍스트 색은 흰색으로 예시
         setFont(new Font("SansSerif", Font.BOLD, 14));
-        // 기본 패딩 (상하 10, 좌우 20)은 필요에 따라 조절
         setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
     }
 
@@ -48,15 +47,13 @@ public class RoundedButton extends JButton {
 
         g2.dispose();
 
-        // 기본 텍스트/아이콘 등은 부모에게 맡겨서 그리도록
         super.paintComponent(g);
     }
 
     @Override
     public void updateUI() {
         super.updateUI();
-        // UI가 업데이트될 때마다 불필요한 설정이 초기화될 수 있으므로,
-        // 위젯 생성 시점 이후에 다시 아래 옵션을 꺼 줍니다.
+
         setContentAreaFilled(false);
         setFocusPainted(false);
         setBorderPainted(false);
